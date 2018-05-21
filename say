@@ -8,6 +8,8 @@ version=0.01    # Initial release
 help_message="$(cat<<'end'
 Name: signal-say utility.  Purpose: Used to make signal-cli easier to use for ordinary day to day messages.
 
+First read: 'Getting started' at:  https://github.com/TopView/signal-say/wiki/Getting-started
+
 --- PURPOSE -----------------------------------------------------------------------------------
 	This is a script to more easily use signal-cli from the command line.
  	You can use this and signal-cli with ANY phone, including an older flip phone, or even a land line.
