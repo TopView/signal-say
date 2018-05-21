@@ -1,0 +1,207 @@
+#/bin/bash 	 Editing tips:  Set tab width to 4.  In vi enter: tabstop=4.  Assumes wide editor is available.
+
+############################################################################################################
+### VERSION & HELP MESSAGE #################################################################################
+############################################################################################################
+version=0.01    # Initial release
+
+help_message="$(cat<<'end'
+Name: signal-say utility.  Purpose: Used to make signal-cli easier to use for ordinary day to day messages.
+
+--- PURPOSE -----------------------------------------------------------------------------------
+	This is a script to more easily use signal-cli from the command line.
+ 	You can use this and signal-cli with ANY phone, including an older flip phone, or even a land line.
+
+--- INSTALLATION AND SETUP --------------------------------------------------------------------
+	1)	Place this script file inside any subdirectory that your default PATH searches.
+
+	2)	In the same subdirectory, (or in ~/etc/signal-cli/ or /etc/signal-cli/) create a rw (read/write)
+		text file named 'contacts' with the names and phone numbers of your friends, as follows:
+
+		*	Enter this exact text as the magic first line (it's use to verify we found the right thing):  
+
+				#Contacts for say and ? scripts which call signal-cli.
+
+		*	Then enter one name/number pair per line.  The format is 'name <tab delimiter> phone number'.
+			Note that phone numbers must be prefixed with a country code, for example '+1' for USA.
+
+		*	One name/number line should be named 'me' with your own phone number.  I put this first.
+
+		*	Comments following a hash symbol (#) are ignored.
+		*	Extra white space is ignored (leading, trailing, and on either side of tab delimiter).
+		*	Blank lines are ignored.
+
+		For example:
+
+			#Contacts for say and ? scripts which call signal-cli.
+			me	+12345678900	#This is my own phone number
+			foo	+12345678901
+			bar	+12345678902
+
+
+		The current directory is first shearched, then ~/etc/signal-cli/, and finally /etc/signal-cli/.
+
+	3)	Create a soft link to this script as follows:  ln -s say ?  The command to talk is 'say'.
+		To listen run '?'.  This will query signal for new messages to you.  (Yes it's legal to have a
+		script named question mark.  If you want you can name it something else.)
+
+	4)	Finally set execute permission on say, as follows:  chmod u+x say  ('?' doesn't need this.)
+
+--- USAGE -------------------------------------------------------------------------------------
+	Example of sending a message to John, and then afterwards polling for any receipts or replies:
+
+		$ say John 'Hi how are you'
+		$ ?
+
+	Note: The receipts or replies might not come right away.  You may have to run '?' again later.
+
+	Synopsis:
+
+		 ? | say [-h -v -e]		- get help, version or list possible environmental variables
+
+			-h --help			- Show purpose, setup and usage				, and then exit.
+			-v --version		- Show version numbers and returns			, and then exit.
+			-e --environment	- Show list of possible environment variables , and then exit.
+
+
+	[TEST=x DRY=x] say [-V] contact message	- Send message to contact.  If -v then verbose.
+	[TEST=x DRY=x] ?   [-V]					- Get any receipts or messages.  Returns quietly if none found.
+
+			contact 			- Name of person to send message to.  Not case sensative.
+			message 			- Text message.  If it has aposterphies (e.g. it's) then put it in double quotes.
+
+			-V --verbose		- Verbose mode.  Shows how signal-cli is called.  
+									i.e. 'DRY=x say -V'  will show you what it's going to do, but not do it.
+
+			TEST=x 				- Test    mode.  If prefix exists then turn on output of debugging test lines.
+			DRY=x 				- Dry run mode.  If prefix exists then do everything but don't call signal-cli.
+
+
+Author: H. Johnson - BridgeportContractor@gmail.com
+end
+)"
+
+
+############################################################################################################
+### CONSTANTS ##############################################################################################
+############################################################################################################
+
+		  app='/opt/signal-cli-0.6.0/bin/signal-cli'						#signal-cli 		  path
+contacts_path=(contacts ~/etc/signal-say/contacts /etc/signal-say/contacts)	#contacts file search path
+
+
+
+############################################################################################################
+### FUNCTIONS ##############################################################################################
+############################################################################################################
+
+# === Remove comments, leading and trailing spaces, and blank lines =====================================
+#Usage: CleanLines <string>
+#								   -comments         -leading sp      -trailing sp   -blank lines
+CleanLines () { echo "$1" | sed -e 's/\s*#.*$//'  -e 's/^\s*//g'   -e 's/\s*$//g' -e '/^\s*$/d'  ; }	
+
+
+# === Strip #comments, empty lines, leading space, and spaces around delimiters =========================
+#Usage: ParseTable <string> [delimiter]
+[ "$delim" ] || delim='|'	#Default delimiter, used if $2 isn't given; And set here if it isn't aready set
+#																-spaces around delimiters 
+ParseTable () { local d="${2:-"$delim"}"; CleanLines "$1" | sed -e "s/\s*$d\s*/$d/g" ; }    
+
+
+# === Emit message - used with TEXT=x prefix to say or ? command to turn on debugging test lines ========
+TEST 	   () { [ $TEST ] && echo "TEST::  $1"; }
+
+
+# === Errors ============================================================================================
+ABORT 	   () { echo "ERROR:  $1"; exit; }
+
+
+# === USAGE =============================================================================================
+#--Convert tabs to spaces
+tabs2spaces () {        #<tab width> <string name>
+    local cursor=0
+    while IFS= read -r -n1 -d '' c; do
+          if [ "$c" == $'\n' ]; then echo; cursor=0;                                 	#With each new line start over
+        elif [ "$c" == $'\t' ]; then                                                 	#For tabs:
+            local spaces=$(( $1 - cursor % $1 ))                                        # How many spaces for this tab
+            ((cursor+=spaces));  while ((spaces)); do echo -n ' ';  ((spaces--)); done  # put the spaces in place of the tab
+																						#  tried to make work w/ for but can't loop zero times
+        else                                          echo -n "$c"; ((cursor++));       #Otherwise
+        fi;
+    done<<<"${!2}"
+}
+
+
+# === Display usage.  Convert tabs to spaces.  4 spaces = 1 tab. ========================================
+Usage       () { tabs2spaces 4 help_message; }
+
+
+# === Lookup a person's phone number ===================================================================
+getPhoneNumber () {
+	TEST "Looking up:  $1"
+	while IFS='	' read -r -a input; do											#Tab delimited
+
+		if [ "${input[0],,}" = "${1,,}" ]; then phone="${input[1]}"; break; fi	#Compare lower case versions
+
+	done <<< "$(ParseTable "$contacts_list" '\t')"								#Input is list of names & phone numbers
+	TEST "got: phone=$phone"
+}
+
+
+
+############################################################################################################
+### MAIN LINE ##############################################################################################
+############################################################################################################
+
+# === Test that we can access signal-cli ================================================================
+[ -x $app ] || ABORT "app is not correctly set to path of signal-cli"
+
+
+# === Options ===========================================================================================
+[ "$1" = -V -o "$1" = --verbose		] && verbose=1																			&& shift
+
+[ "$1" = -h -o "$1" = --help		] && Usage																				&& exit
+[ "$1" = -v -o "$1" = --version     ] && (echo "'say' version:  $version"; echo "'signal-cli' version:  $($app --version)") && exit
+[ "$1" = -e -o "$1" = --environment ] && cat<<'end' 																		&& exit
+ENVIRONMENT VARIABLES:
+
+	TEST	- Turns on output of debugging test lines (without changing behavior).
+	DRY     - Turns on dry-run mode mode (don't actually call signal-cli).
+
+    Command line usage example:  <environment variable>=T ?
+
+end
+
+
+# === Find contacts file and validate that it's our contacts list ======================================
+# Search for it starting at the current local location and proceeding to global location
+for c in ${contacts_path[@]}; do
+	if [ -f $c ]; then contacts=$c; break; fi
+done
+[ $contacts ] || ABORT "Can't find '$contacts' file."
+
+contacts_list="$(cat $contacts)"; TEST "$contacts_list"		#Read the list
+
+# Check for magic first line
+ContactsMagicFirstLine='#Contacts for say and ? scripts which call signal-cli.'
+[ "$(head -1 "$contacts")" != "$ContactsMagicFirstLine" ] && ABORT "First line of '$contacts' file isn't correct."
+
+
+# === Lookup my phone number ===========================================================================
+	getPhoneNumber "me"; 		me="$phone"; TEST "Got my phone#:  $me" #Get my (sender's) phone number
+
+
+# === Send or get messages =============================================================================
+if [ "$(basename $0)" = 'say' ]; then
+
+	# -- Send message
+	getPhoneNumber "$1"; recipient="$phone"; TEST "Got To: phone#:  $recipient"; shift	#Get recipient's phone number
+
+	#-- send message (and possibly attachments w/ -a attachments)
+	[ $verbose ] &&	args "$app" -u "$me" send -m "$*" "$recipient"
+	[ $DRY ] || 		 "$app" -u "$me" send -m "$*" "$recipient"
+
+else
+	[ $verbose ] && args "$app" -u "$phone" receive
+	[ $DRY ] || 		 "$app" -u "$phone" receive
+fi
