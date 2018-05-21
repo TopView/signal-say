@@ -1,6 +1,6 @@
 ### This is a bash script to more easily use [signal-cli](https://github.com/AsamK/signal-cli) from the command line.
 
-Note: You can use signal-say and signal-cli with ANY phone, including an older flip phone, or even a land line.
+Note: You can use this with signal-cli with ANY phone, including an older flip phone, or even a land line.
 
 ***
 
