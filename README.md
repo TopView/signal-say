@@ -31,3 +31,15 @@ where the number is your phone number.  Add the --voice option if you can't rece
 Once verified you can use signal-say as described in the help (mentioned above).  
 
 **Using signal-say is simple.**  You'll be using two commands: `say` and `?`.  `say` to send a message, and `?` to poll for any return receipts or replies.  (Just to make typing easier the default command is named `say` rather than `signal-say`, but you can rename it if you want to avoid any conflicts.)
+
+**Files**
+
+    .editorconfig   - Sets github editing options (like tabs set to 4 wide)
+
+    say             - THE MAIN PROGRAM HERE  
+    args            - Helper utility used with -V / --verbose command line option to show effect of word splitting
+
+    README.md       - This introduction  
+    icon.png        - A little graphic for this introduction
+
+    LICENSE         - Legal verbage
