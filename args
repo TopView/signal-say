@@ -1,0 +1,13 @@
+#!/bin/sh	 Editing tips:  Set tab width to 4.  In vi enter: tabstop=4.
+#
+# This is a bash development and debugging utility to print command arguments (i.e. to show word splitting)
+#
+# Usage: args <bunch of arguments>
+#
+# Example usage: 
+#   $ args this "is a test"
+#   2 args: <this> <is a test>
+
+printf "%d args:" $#
+printf " <%s>" "$@"
+echo
