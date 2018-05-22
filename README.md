@@ -35,7 +35,7 @@ Once verified you can use signal-say as described in the help (mentioned above).
 **Program files**
 
     say             - THE MAIN PROGRAM HERE  
-    args            - Helper utility used with -V / --verbose command line option to show effect of word splitting
+    args            - Helper utility used with -V / --verbose option to show effect of word splitting
 
 **Misc. files**
 
