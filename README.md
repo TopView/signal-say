@@ -4,7 +4,7 @@
 
 Note: You can use this with signal-cli with ANY phone, including an older flip phone, or even a land line.
 
-The file you care about is 'say' above.  It has further instructions inside it or when you run: `say --help`
+The file you care about is 'say' above.  It has further instructions inside it or when you run: `say --help`  (Note: `args` is a helper utility needed with the -V or --verbose option.)
 
 ***
 
