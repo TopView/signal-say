@@ -14,13 +14,15 @@ The file you care about is 'say' above.  It has further instructions inside it o
 
 **Installation and usage:** `say --help`, (or read the well commented source code [here](https://github.com/TopView/signal-say/blob/master/say)).
 
-**Important:** You must first register and verity your phone number.  Refer to [signal-cli man page](https://github.com/AsamK/signal-cli/blob/master/man/signal-cli.1.adoc).  Basically you need to first run this:
+**Important:** You must first *register* and *verity* your phone number (with a leading country code).  Refer to [signal-cli man page](https://github.com/AsamK/signal-cli/blob/master/man/signal-cli.1.adoc).  
+
+1) Basically you need to first run this:
 
     signal-cli -u +1234567890 register [--voice]
 
 where the number is your phone number.  Add the --voice option if you can't receive txt messages, e.g. your phone is a plain old land line.
 
-And then run this to verify and finalize that registration:
+2) And then run this to verify and finalize that registration:
 
     signal-cli verify <the 6 digit verification code you were texted or called back with>
 
