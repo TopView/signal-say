@@ -1,4 +1,6 @@
-### This is a bash script to more easily use [signal-cli](https://github.com/AsamK/signal-cli) from the command line.
+![say](https://github.com/TopView/signal-say/blob/master/icon.png)
+
+### This is a bash script to more easily use [signal-cli](https://github.com/AsamK/signal-cli) from the command line. 
 
 Note: You can use this with signal-cli with ANY phone, including an older flip phone, or even a land line.
 
