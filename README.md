@@ -3,6 +3,7 @@
 ### This is a bash script to more easily use [signal-cli](https://github.com/AsamK/signal-cli) from the command line. 
 
 Note: You can use this with signal-cli with ANY phone, including an older flip phone, or even a land line.
+  ([How to install and use Signal messenger without a smartphone](https://ctrl.alt.coop/en/post/signal-without-a-smartphone/)).
 
 The file you care about is 'say' above.  It has further instructions inside it or when you run: `say --help`  (Note: `args` is a helper utility needed with the -V or --verbose option.)
 
